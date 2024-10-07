@@ -1,31 +1,28 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { Prisma } from "../database";
+import type { NextApiRequest, NextApiResponse } from "next";
 
-const getEnvVariable = (varName: string): string => {
-  const value = process.env[varName];
-  if (!value) {
-    throw new Error(`Missing environment variable: ${varName}`);
-  }
-  return value;
-};
-
-const authOptions = {
+export const authOptions: NextAuthOptions = {
+  pages: {
+    signIn: '/auth',
+    signOut: '/auth',
+    error: '/auth',
+    verifyRequest: '/auth',
+    newUser: '/app',
+  },
   adapter: PrismaAdapter(Prisma),
   providers: [
     EmailProvider({
-      server: {
-        host: getEnvVariable('EMAIL_SERVER').split('@')[1].split(':')[0], 
-        port: getEnvVariable('EMAIL_SERVER').split(':')[2],
-        auth: {
-          user: getEnvVariable('EMAIL_SERVER').split(':')[1].split('//')[1], 
-          pass: getEnvVariable('EMAIL_SERVER').split(':')[2].split('@')[0] 
-        }
-      },
-      from: getEnvVariable('EMAIL_FROM'), 
+      server: process.env.EMAIL_SERVER,
+      from: process.env.EMAIL_FROM,
     }),
   ],
 };
 
-export default NextAuth(authOptions);
+const nextAuthInstance = NextAuth(authOptions);
+
+export const GET = (req: NextApiRequest, res: NextApiResponse) => nextAuthInstance(req, res);
+export const POST = (req: NextApiRequest, res: NextApiResponse) => nextAuthInstance(req, res);
+

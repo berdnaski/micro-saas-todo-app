@@ -1,51 +1,46 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { useForm } from "react-hook-form";
-import { signIn } from "next-auth/react";
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { useForm } from "react-hook-form"
+import { signIn } from "next-auth/react"
+import { toast } from "@/hooks/use-toast"
 
 export function AuthForm() {
-  const form = useForm();
+  const form = useForm()
 
   const handleSubmit = form.handleSubmit(async (data) => {
-    console.log(data);
-    await signIn('email', { email: data.email });
-  });
-  
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Login</CardTitle>
-            <CardDescription>Enter your email to access your account</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="Enter your email" 
-                  required 
-                  {...form.register('email')}
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                Send Magic Link
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+    try {
+      await signIn('email', { email: data.email, redirect: false })
+
+      toast({
+        title: 'Magic Link Sent',
+        description: 'Check your email for the magic link to login'
+      })
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'An error occurred. Please try again.'
+      })
+    }
+  })
+
+  return (
+    <div className="mx-auto max-w-sm space-y-8">
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-bold">Login</h1>
+        <p className="text-gray-500 dark:text-gray-400">Enter your email below to login to your account</p>
       </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" placeholder="m@example.com" required type="email" {...form.register('email')} />
+        </div>
+        <Button className="w-full" type="submit">
+          Send Magic Link
+        </Button>
+      </form>
+    </div>
   )
 }
