@@ -8,7 +8,7 @@ import { signIn } from "next-auth/react"
 import { toast } from "@/hooks/use-toast"
 
 export function AuthForm() {
-  const form = useForm()
+  const form = useForm();
 
   const handleSubmit = form.handleSubmit(async (data) => {
     try {
